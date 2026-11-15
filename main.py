@@ -98,7 +98,7 @@ def o(ms,pl):
   if not y and u==e:y=1
   s=10000+C(y)*100-C(b[v&127])if y else 0
   if v>>14:s+=9000
-  if v==K[pl]:s+=5000
+  if v==K[pl]:s+=6000
   r.append((-s,v))
  r.sort()
  return[v for _,v in r]
