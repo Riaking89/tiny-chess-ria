@@ -1,4 +1,8 @@
-import sys,time
+import time,os,json,urllib.request as ur
+U=os.environ['MAKEFUN_ENV_URL']
+def P(p,b):
+ q=ur.Request(U+p,data=json.dumps(b).encode())
+ return json.load(ur.urlopen(q))
 V=0,100,320,330,500,900,20000
 J=-33,-31,-18,-14,14,18,31,33
 G=-17,-16,-15,-1,1,15,16,17
@@ -10,7 +14,7 @@ A=[b'<<<<=>>8=;:<<<<@==>A>>@BFFFF<<<<',b'@B><@@<<:88886646442644264426442']
 E=[[(t[i//8*4+min(i%8,7-i%8)]-60)*5 for i in range(64)]for t in A]
 b=[0]*128;w=1;c=0;e=-1;k=[4,116]
 H=[]
-N=0;S=0;Z=0;M=12e4;B=8.5;R=0
+N=0;S=0;Z=0;M=12e4;B=6;R=0
 I=1e6;O=1e5
 def a(s,y):
  p=2*y-1
@@ -150,23 +154,17 @@ def p(f):
  w=1;c=15;e=-1;k=[4,116];H.clear()
 def main():
  global N,S,Z,R
- p(0)
- for l in sys.stdin:
-  x=l.split()
-  if not x:continue
-  z=x[0]
-  if z=='uci':print('id name RiaChess\nid author Ria\nuciok',flush=1)
-  elif z=='isready':print('readyok',flush=1)
-  elif z=='quit':break
-  elif z=='position':
-   p(0)
-   if x[2:3]==['moves']:
-    for mv in x[3:]:m(s2(mv))
-  elif z=='go':
-   N=0;S=0;Z=time.time()+B;v=0
-   for d in range(1,65):
-    R=0;s(d,-I,I,0)
-    if S or not R:break
-    v=R
-   print('bestmove',m2(v)if v else'0000',flush=1)
+ while 1:
+  r=P('/game',{})
+  if r['status']=='done':break
+  if r['status']!='your_move':continue
+  p(0)
+  for mv in r['moves']:m(s2(mv))
+  N=0;S=0;Z=time.time()+B;v=0
+  for d in range(1,65):
+   R=0;s(d,-I,I,0)
+   if S or not R:break
+   v=R
+  try:P('/move',{'game':r['game'],'move':m2(v)if v else'0000'})
+  except:P('/resign',{'game':r['game']})
 main()
