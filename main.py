@@ -110,6 +110,9 @@ def s(d,al,be,pl):
  if N>=M or(N&1023==0 and time.time()>Z):S=1;return 0
  if S:return 0
  ck=a(k[not w],not w)
+ if d>2 and not ck and pl:
+  w^=1;t=e;e=-1;x=-s(d-3,-be,1-be,pl+1);e=t;w^=1
+  if x>=be:return be
  if d<=0 and not ck:
   x=v()
   if x>=be:return be
