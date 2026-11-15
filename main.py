@@ -5,20 +5,23 @@ def P(p,b):
  return json.load(ur.urlopen(q))
 V=0,100,320,330,500,900,20000
 J=-33,-31,-18,-14,14,18,31,33
-G=-17,-16,-15,-1,1,15,16,17
 Y=-17,-15,15,17
 X=-16,-1,1,16
+G=Y+X
 D=[0,0,J,Y,X,Y+X,G]
 Q=range(128)
 A=[b'<<<<=>>8=;:<<<<@==>A>>@BFFFF<<<<',b'@B><@@<<:88886646442644264426442']
-E=[[(t[i//8*4+min(i%8,7-i%8)]-60)*5 for i in range(64)]for t in A]
-b=[0]*128;w=1;c=0;e=-1;k=[4,116]
-H=[]
-N=0;S=0;Z=0;M=12e4;B=6;R=0
-I=1e6;O=1e5
+C=abs
+E=[[(t[i//8*4+3-C(i%8-3)]-60)*5 for i in range(64)]for t in A]
+T=[(V[C(p)]+(E[1][i] if C(p)==6 else E[0][i] if C(p)==1 else 6-C(i%8-3)-C(i//8-3)))*((p>0)*2-1)for p in range(-6,7)for q in range(128)for i in[(q>>1&56|q&7)^56*(p<0)]]
+L=[0]*128
+L[0]=2;L[7]=1;L[112]=8;L[119]=4;L[4]=3;L[116]=12
+b=[0]*128;e=-1;k=[4,116]
+H=[];K=[0]*256
+N=0;S=0;Z=0;M=25e4;R=0;F=0;I=1e6
 def a(s,y):
  p=2*y-1
- for u in((s-15,s-17)if y else(s+15,s+17)):
+ for u in(s+15*(1-2*y),s+17*(1-2*y)):
   if not u&0x88 and b[u]==p:return 1
  for D,p in((J,2),(G,6)):
   for d in D:
@@ -29,7 +32,7 @@ def a(s,y):
   while not u&0x88:
    p=b[u]
    if p:
-    if(p>0)==y and(abs(p)==5 or abs(p)==3+(d in X)):return 1
+    if(p>0)==y and(C(p)in(5,3+(d in X))):return 1
     break
    u+=d
  return 0
@@ -38,7 +41,7 @@ def g(cp):
  for s in Q:
   p=b[s]
   if not p or(p>0)!=w:continue
-  z=abs(p)
+  z=C(p)
   if z==1:
    d=32*w-16;u=s+d
    if not u&0x88 and not b[u]:
@@ -70,58 +73,49 @@ def g(cp):
       if b[s+ro]==4*(2*w-1)and not any(b[s+dd*x]for x in range(1,n2+1))and not any(a(s+i*dd,not w)for i in(0,1,2)):m.append(s|(s+2*dd)<<7)
  return m
 def m(v):
- global w,c,e
+ global w,c,e,S
  f=v&127;u=v>>7&127;q=v>>14
- p=b[f];y=b[u]
- H.append((b[:],w,c,e,k[:]))
- r=q*(2*w-1)or p
- if abs(p)==1 and u==e:
-  b[u+16-32*w]=0
- if not q and abs(p)==6 and abs(u-f)==2:
-  a=u+1-3*(u<f);t=u-1+2*(u<f);b[t]=b[a];b[a]=0
+ p=b[f];y=b[u];r=q*(2*w-1)or p
+ H.append((b[:],w,c,e,k[:],S))
+ S+=T[(r+6)<<7|u]-T[(p+6)<<7|f]
+ if y:S-=T[(y+6)<<7|u]
+ if C(p)==1 and u==e:
+  x=u+16-32*w;S-=T[(b[x]+6)<<7|x];b[x]=0
+ if not q and C(p)==6 and C(u-f)==2:
+  a=u+1-3*(u<f);t=u-1+2*(u<f);S+=T[(b[a]+6)<<7|t]-T[(b[a]+6)<<7|a];b[t]=b[a];b[a]=0
  b[u]=r;b[f]=0
- if not q and abs(p)==6:k[not w]=u;c&=3+9*w
- for q,bit in((0,2),(7,1),(112,8),(119,4)):
-  if q in(f,u):c&=~bit
- e=(f+u)//2*(abs(p)==1 and abs(u-f)==32)or-1
+ if not q and C(p)==6:k[not w]=u
+ c&=~(L[f]|L[u])
+ e=(f+u)//2*(C(p)==1 and C(u-f)==32)or-1
  w^=1
 def u():
- global b,w,c,e,k
- b,w,c,e,k=H.pop()
-def v():
- s=0
- for q in Q:
-  p=b[q]
-  if not p:continue
-  z=abs(p);i=q>>1&56|q&7
-  if p<0:i^=56
-  x=V[z]+(E[1][i] if z==6 else E[0][i] if z==1 else 6-abs(i%8-3)-abs(i//8-3))
-  s+=x if p>0 else-x
- return s if w else-s
-def o(ms):
+ global b,w,c,e,k,S
+ b,w,c,e,k,S=H.pop()
+def o(ms,pl):
  r=[]
  for v in ms:
   u=v>>7&127;y=b[u]
   if not y and u==e:y=1
-  s=10000+abs(y)*100-abs(b[v&127])if y else 0
+  s=10000+C(y)*100-C(b[v&127])if y else 0
   if v>>14:s+=9000
+  if v==K[pl]:s+=5000
   r.append((-s,v))
  r.sort()
  return[v for _,v in r]
 def s(d,al,be,pl):
- global N,S,R,w,c,e
+ global N,F,R,w,c,e
  N+=1
- if N>=M or(N&1023==0 and time.time()>Z):S=1;return 0
- if S:return 0
+ if N>=M or(N&1023==0 and time.time()>Z):F=1;return 0
+ if F:return 0
  ck=a(k[not w],not w)
  if d>2 and not ck and pl:
   w^=1;t=e;e=-1;x=-s(d-3,-be,1-be,pl+1);e=t;w^=1
   if x>=be:return be
  if d<=0 and not ck:
-  x=v()
+  x=S if w else-S
   if x>=be:return be
   al=max(al,x)
- ms=o(g(d<=0 and not ck))
+ ms=o(g(d<=0 and not ck),pl)
  bs=-I;bm=0;lg=0
  for j in ms:
   m(j)
@@ -129,42 +123,36 @@ def s(d,al,be,pl):
   lg=1
   x=-s(d-1,-be,-al,pl+1)
   u()
-  if S:return 0
+  if F:return 0
   if x>bs:bs=x;bm=j
   al=max(al,x)
-  if al>=be:break
+  if al>=be:K[pl]=j;break
  if not lg:
-  if d>0 or ck:return-O+pl if ck else 0
+  if d>0 or ck:return-I+pl if ck else 0
   return al
  if pl==0:R=bm
  return bs
 def m2(v):
- s=chr(97+(v&7))+str(1+(v>>4&7))+chr(97+(v>>7&7))+str(1+(v>>11&7))
- if v>>14:s+='nbrq'[(v>>14)-2]
- return s
+ return '%c%d%c%d'%(97+(v&7),1+(v>>4&7),97+(v>>7&7),1+(v>>11&7))+('nbrq'[(v>>14)-2]if v>>14 else'')
 def s2(x):
- f=ord(x[0])-97+(int(x[1])-1)*16
- u=ord(x[2])-97+(int(x[3])-1)*16
- q='nbrq'.index(x[4])+2 if len(x)>4 else 0
- return f+(u<<7)|(q<<14)
+ return(ord(x[0])-97+(int(x[1])-1)*16)+((ord(x[2])-97+(int(x[3])-1)*16)<<7)|((('nbrq'.find(x[4])+2)if len(x)>4 else 0)<<14)
 def p(f):
- global b,w,c,e,k
+ global b,w,c,e,k,S
  R=[4,2,3,5,6,3,2,4]
  b=R+[0]*8+[1]*8+[0]*72+[-1]*8+[0]*8+[-x for x in R]+[0]*8
- w=1;c=15;e=-1;k=[4,116];H.clear()
+ w=1;c=15;e=-1;k=[4,116];H.clear();S=0
 def main():
- global N,S,Z,R
+ global N,F,Z,R
  while 1:
   r=P('/game',{})
   if r['status']=='done':break
   if r['status']!='your_move':continue
   p(0)
   for mv in r['moves']:m(s2(mv))
-  N=0;S=0;Z=time.time()+B;v=0
+  N=0;F=0;Z=time.time()+6;v=0
   for d in range(1,65):
    R=0;s(d,-I,I,0)
-   if S or not R:break
+   if F or not R:break
    v=R
-  try:P('/move',{'game':r['game'],'move':m2(v)if v else'0000'})
-  except:P('/resign',{'game':r['game']})
+  P('/move',{'game':r['game'],'move':m2(v)if v else'0000'})
 main()
