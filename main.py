@@ -17,7 +17,7 @@ T=[(V[C(p)]+(E[1][i] if C(p)==6 else E[0][i] if C(p)==1 else 6-C(i%8-3)-C(i//8-3
 L=[0]*128
 L[0]=2;L[7]=1;L[112]=8;L[119]=4;L[4]=3;L[116]=12
 b=[0]*128;e=-1;k=[4,116]
-H=[];K=[0]*256
+H=[]
 N=0;S=0;Z=0;M=25e4;R=0;F=0;I=1e6
 def a(s,y):
  p=2*y-1
@@ -98,7 +98,6 @@ def o(ms,pl):
   if not y and u==e:y=1
   s=10000+C(y)*100-C(b[v&127])if y else 0
   if v>>14:s+=9000
-  if v==K[pl]:s+=6000
   r.append((-s,v))
  r.sort()
  return[v for _,v in r]
@@ -126,7 +125,7 @@ def s(d,al,be,pl):
   if F:return 0
   if x>bs:bs=x;bm=j
   al=max(al,x)
-  if al>=be:K[pl]=j;break
+  if al>=be:break
  if not lg:
   if d>0 or ck:return-I+pl if ck else 0
   return al
